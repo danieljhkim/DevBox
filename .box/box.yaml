@@ -1,7 +1,7 @@
 version: 1
 name: "devbox"
 type: "service"  # service | cli | library | distributed | mono
-spec_version: "0.1.0"
+spec_version: "0.2.0"
 
 commands:
   bootstrap:

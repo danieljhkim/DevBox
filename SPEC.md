@@ -1,7 +1,7 @@
 # DevBox Specification
 
-**Version:** 0.1.0  
-**Status:** Draft (stable for v0.1 adopters)
+**Version:** 0.2.0  
+**Status:** Draft (stable for v0.2 adopters)
 
 This document defines the **normative specification** for DevBox.
 

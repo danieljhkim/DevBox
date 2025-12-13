@@ -7,6 +7,27 @@ Versions are tagged in Git.
 
 ---
 
+## v0.2.0 — 2025-12-13
+
+### Added
+- support for `devbox mcp start` to run MCP server manually in foreground
+- VS Code Copilot agent guardrails
+- Cursor agent instructions
+- MCP server ported into .box
+
+### Changed
+- MCP tool names standardized (`box-run`, etc.)
+- devbox CLI auto-discovers repo root
+
+### Fixed
+- policy enforcement tightening
+
+### Documentation
+- updated README + QUICK_START to reflect new CLI
+- added conformance docs
+
+---
+
 ## v0.1.0 — Initial Public Template
 
 ### Added
