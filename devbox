@@ -1,0 +1,52 @@
+#!/usr/bin/env sh
+set -eu
+
+# devbox
+#
+# Lightweight command wrapper for DevBox template repo.
+# This is NOT a framework CLI — it simply dispatches to scripts.
+#
+# Usage:
+#   ./devbox init [TARGET_DIR] [options]
+#
+# Example:
+#   ./devbox init --minimal --gitignore
+#   ./devbox init ../my-repo --dry-run
+
+usage() {
+  cat <<'TXT'
+DevBox command wrapper
+
+Usage:
+  devbox init [TARGET_DIR] [options]
+
+Commands:
+  init     Install DevBox into a repository
+
+Run `devbox init --help` for init options.
+TXT
+}
+
+if [ "${1:-}" = "" ]; then
+  usage
+  exit 1
+fi
+
+CMD="$1"
+shift
+
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+
+case "$CMD" in
+  init)
+    exec "$SCRIPT_DIR/install-devbox.sh" "$@"
+    ;;
+  --help|-h|help)
+    usage
+    ;;
+  *)
+    echo "Unknown command: $CMD" >&2
+    usage
+    exit 1
+    ;;
+esac
