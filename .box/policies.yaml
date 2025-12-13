@@ -1,0 +1,50 @@
+# If you don’t understand this file, do not loosen it.
+
+version: 1
+mode: "readonly"  # readonly | safe-write | admin
+
+allow:
+  commands:
+    - bootstrap
+    - up
+    - down
+    - doctor
+    - test
+    - smoke
+    - lint
+    - fmt
+    - bench
+    - logs
+    - report
+    - reset
+
+  read_paths:
+    - ".box/"
+    - "src/"
+    - "logs/"
+    - "reports/"
+    - "contracts/"
+    - ".box/contracts/"
+    - "."
+
+  write_paths:
+    - "reports/"
+    - "logs/"
+    - ".box/state/"
+
+deny:
+  commands:
+    - deploy
+    - publish
+    - release
+    - prod
+    - delete_data
+
+limits:
+  max_runtime_seconds: 900
+  max_parallel_commands: 2
+  max_log_bytes_to_read: 2000000
+  network:
+    allow:
+      - "http://localhost:*"
+      - "https://localhost:*"

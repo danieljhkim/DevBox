@@ -211,6 +211,9 @@ Expect evolution — not churn.
 
 ---
 
+**DevBox Conformance:** Core  
+(Extended and Agent-Ready supported via configuration)
+
 ## License
 
 MIT
