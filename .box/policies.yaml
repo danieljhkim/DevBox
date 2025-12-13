@@ -13,6 +13,7 @@ allow:
     - logs
     - reset
 
+# Note: source code is intentionally not readable by agents by default. You can add as needed
   read_paths:
     - ".box/"
     - "logs/"

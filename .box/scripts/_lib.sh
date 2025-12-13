@@ -1,6 +1,13 @@
 #!/usr/bin/env sh
 set -eu
 
+# Load local DevBox environment overrides if present
+# This allows BOX_UP_CMD / BOX_DOWN_CMD to be defined without manual export
+if [ -f ".box/env/.env.local" ]; then
+  # shellcheck disable=SC1091
+  . ".box/env/.env.local"
+fi
+
 # Shared helpers for DevBox scripts.
 # Keep this POSIX-sh compatible; use bash only when we need pipefail.
 

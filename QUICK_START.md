@@ -20,23 +20,42 @@ It wraps what you already have and makes it **explicit, deterministic, and opera
 
 ## 1. Install DevBox
 
-From the DevBox template repo:
+```bash
+# 0) Clone the DevBox template repo and cd into it
+git clone https://github.com/danieljhkim/DevBox.git
+cd DevBox
+```
+
+First, make sure the DevBox `bin/` directory is on your `PATH`:
 
 ```bash
-./devbox init /path/to/your-repo --minimal --gitignore
+# Ensure the devbox script is executable
+chmod +x /bin/*
+
+# Add DevBox to your PATH (adjust this to where you cloned the DevBox repo)
+echo 'export PATH="$HOME/path/to/devbox/bin:$PATH"' >> ~/.zprofile
+```
+
+Then, from anywhere:
+
+```bash
+devbox init /path/to/your-repo --minimal --gitignore
 ```
 
 Or from inside the target repo:
 
 ```bash
-/path/to/devbox-template/devbox init . --minimal --gitignore
+devbox init . --minimal --gitignore
 ```
 
 To preview changes without modifying anything:
 
 ```bash
-./devbox init . --minimal --gitignore --dry-run
+devbox init . --minimal --gitignore --dry-run
 ```
+
+![devbox init](docs/images/devbox_cmd.png)
+
 
 This creates:
 
@@ -70,7 +89,10 @@ BOX_HEALTH_URL="http://localhost:8080/health"
 Notes:
 - These values are **machine-local**
 - `.box/env/.env.local` should not be committed
-- DevBox scripts read these at runtime
+- DevBox scripts load this file automatically at runtime
+
+> All `devbox` commands may be run from **any subdirectory** inside the repository.
+> DevBox will automatically locate the repo root containing `.box/`.
 
 ---
 
@@ -79,7 +101,7 @@ Notes:
 Run the diagnostic check:
 
 ```bash
-.box/scripts/doctor.sh
+devbox doctor
 ```
 
 This verifies:
@@ -95,7 +117,7 @@ Fix any reported issues before continuing.
 ## 4. Start the System
 
 ```bash
-.box/scripts/up.sh
+devbox up
 ```
 
 What this does:
@@ -108,7 +130,7 @@ What this does:
 ## 5. Check Health
 
 ```bash
-.box/scripts/smoke.sh --health
+devbox health
 ```
 
 DevBox will:
@@ -123,7 +145,7 @@ This command is safe to run repeatedly.
 ## 6. Validate Changes
 
 ```bash
-.box/scripts/test.sh
+devbox test
 ```
 
 This script should:
@@ -137,6 +159,8 @@ DevBox does not enforce *how* tests run — only *where outputs go*.
 
 ## 7. Inspect Logs and State
 
+You can inspect logs and state either directly, or via the DevBox CLI.
+
 Logs:
 ```bash
 ls logs/
@@ -145,6 +169,11 @@ ls logs/
 Runtime state:
 ```bash
 ls .box/state/
+```
+
+Via DevBox:
+```bash
+devbox logs
 ```
 
 These paths are **stable** and safe for:
@@ -157,7 +186,7 @@ These paths are **stable** and safe for:
 ## 8. Stop the System
 
 ```bash
-.box/scripts/down.sh
+devbox down
 ```
 
 This should:
@@ -167,20 +196,34 @@ This should:
 
 ---
 
-## Optional: MCP Integration
+## Optional: Enable MCP (AI Agents)
 
 DevBox can be exposed to AI agents via MCP (Model Context Protocol).
 
-This is **optional**.
+This is **optional** and **explicitly opt-in**.
 
-If enabled, agents may:
-- run allowlisted commands
-- read logs and contracts
-- check system health
+To enable MCP wiring for VS Code or Cursor:
 
-DevBox itself does not depend on MCP.
+```bash
+devbox mcp enable
+```
 
-See `.box/mcp/README.md` for details.
+This creates a `.vscode/mcp.json` file pointing to the DevBox MCP server under `.box/`. And installs and builds the MCP server.
+
+Next, Start the MCP server. 
+
+```bash
+# Useful for debugging or non-editor hosts
+devbox mcp start
+```
+
+Now the agent can safely perform actions.
+
+![devbox agent actions](docs/images/agent_mcp.png)
+
+
+DevBox itself does **not** depend on MCP.
+
 
 ---
 

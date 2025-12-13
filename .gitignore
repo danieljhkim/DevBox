@@ -1,5 +1,5 @@
 ### Editors ###
-.vscode/
+
 .idea/
 
 ### OS ###
@@ -14,9 +14,11 @@
 
 ### Node / JS (template convenience) ###
 node_modules/
-dist/
+
 package-lock.json
 
 ### Archives / data ###
 *.jar
 *.dat
+
+dist/

@@ -5,9 +5,9 @@ set -eu
 #
 # Copy the DevBox contract (.box/) from this template repo into a target repo.
 #
-# Usage:
-#   ./install-devbox.sh                 # install into current directory
-#   ./install-devbox.sh /path/to/repo   # install into target repo
+# Usage (recommended: put this script in bin/ and add it to PATH):
+#   install-devbox                 # install into current directory
+#   install-devbox /path/to/repo   # install into target repo
 #
 # Options:
 #   --minimal     Install only the core DevBox contract (skips .box/mcp/)
@@ -21,8 +21,8 @@ usage() {
 DevBox installer
 
 Usage:
-  ./install-devbox.sh [TARGET_DIR] [--minimal] [--force] [--gitignore] [--dry-run]
-  ./install-devbox.sh --help
+  install-devbox [TARGET_DIR] [--minimal] [--force] [--gitignore] [--dry-run]
+  install-devbox --help
 
 Options:
   --minimal     Install only the core DevBox contract (skips .box/mcp/)
@@ -67,11 +67,21 @@ if [ "$TARGET_DIR" = "" ]; then
 fi
 
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+
+# Support running from either:
+#  - repo root (install-devbox.sh next to .box/)
+#  - bin/ (bin/install-devbox next to ../.box/)
 SRC_BOX_DIR="$SCRIPT_DIR/.box"
+if [ ! -d "$SRC_BOX_DIR" ]; then
+  SRC_BOX_DIR="$SCRIPT_DIR/../.box"
+fi
 
 if [ ! -d "$SRC_BOX_DIR" ]; then
-  err "Template .box/ not found at: $SRC_BOX_DIR"
-  err "Run this script from the DevBox template repo root."
+  err "Template .box/ not found."
+  err "Looked in:"
+  err "  - $SCRIPT_DIR/.box"
+  err "  - $SCRIPT_DIR/../.box"
+  err "Install DevBox by running this script from the DevBox template repo, or keep it in bin/ within that repo."
   exit 1
 fi
 
@@ -170,8 +180,11 @@ log ""
 log "Next steps:"
 log "  1) cp .box/env/.env.local.example .box/env/.env.local"
 log "  2) edit .box/env/.env.local and set BOX_UP_CMD / BOX_DOWN_CMD / BOX_HEALTH_URL"
-log "  3) run:"
-log "       .box/scripts/doctor.sh"
-log "       .box/scripts/up.sh"
-log "       .box/scripts/smoke.sh --health"
-log "       .box/scripts/down.sh"
+log "  3) run (from anywhere inside the repo):"
+log "       devbox doctor"
+log "       devbox up"
+log "       devbox health"
+log "       devbox down"
+log ""
+log "Optional (VS Code / Cursor):"
+log "  devbox mcp enable"

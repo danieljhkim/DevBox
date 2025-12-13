@@ -2,7 +2,7 @@
   "version": 1,
   "tools": [
     {
-      "name": "box.run",
+      "name": "box-run",
       "description": "Run an allowlisted box command",
       "inputSchema": {
         "type": "object",
@@ -14,7 +14,7 @@
       }
     },
     {
-      "name": "box.read_logs",
+      "name": "box-read-logs",
       "description": "Read logs from logs/ with optional filtering",
       "inputSchema": {
         "type": "object",
@@ -27,7 +27,7 @@
       }
     },
     {
-      "name": "box.read_contract",
+      "name": "box-read-contract",
       "description": "Read a contract file (openapi/proto/schema/invariants)",
       "inputSchema": {
         "type": "object",
@@ -38,7 +38,7 @@
       }
     },
     {
-      "name": "box.health",
+      "name": "box-health",
       "description": "Run configured health checks from box.yaml",
       "inputSchema": { "type": "object", "properties": {} }
     }

@@ -20,7 +20,7 @@ If it is not defined here, it is **not part of the DevBox contract**.
 ├── scripts/           # Deterministic command implementations
 ├── state/             # Runtime state (pids, ports, metadata)
 ├── contracts/         # APIs, schemas, invariants (optional)
-└── mcp/               # MCP adapter contract (optional)
+└── mcp/               # MCP adapter contract & server (optional)
 ```
 
 ---

@@ -1,0 +1,31 @@
+{
+  // ------------------------------
+  // Copilot Agent guardrails
+  // ------------------------------
+
+  // Ensure Copilot reads repo instruction files (e.g. .github/copilot-instructions.md).
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+
+  // Do not let agent mode run build tasks automatically.
+  "github.copilot.chat.agent.runTasks": false,
+
+  // Optional: reduce how many tool/action requests an agent can make per run.
+  // Keep this modest so behavior stays intentional.
+  "chat.agent.maxRequests": 15,
+
+  // Require approval for ALL terminal commands suggested by agents.
+  // This prevents bypassing the DevBox contract via ad-hoc `make`, `mvn`, etc.
+  "chat.tools.terminal.autoApprove": {
+    "/.*/": false
+  },
+
+  // ------------------------------
+  // MCP (Model Context Protocol)
+  // ------------------------------
+
+  // Keep MCP server discovery from other apps disabled; use the workspace's mcp.json wiring.
+  "chat.mcp.discovery.enabled": false,
+
+  // Allow MCP servers, but manage them explicitly via settings/UI.
+  "chat.mcp.access": true
+}

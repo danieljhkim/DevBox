@@ -64,11 +64,11 @@ Core requires these commands to exist in `.box/box.yaml` and be runnable:
 
 **DevBox Conformance:** Core
 
-Quick commands:
-- `.box/scripts/doctor.sh`
-- `.box/scripts/up.sh`
-- `.box/scripts/smoke.sh --health`
-- `.box/scripts/down.sh`
+Quick commands (run from anywhere inside the repo):
+- `devbox doctor`
+- `devbox up`
+- `devbox health`
+- `devbox down`
 ```
 
 ---
@@ -95,11 +95,11 @@ Extended requires all Core commands plus these to be implemented:
 **DevBox Conformance:** Extended
 
 Typical flow:
-1. `.box/scripts/doctor.sh`
-2. `.box/scripts/up.sh`
-3. `.box/scripts/smoke.sh --health`
-4. `.box/scripts/test.sh`
-5. `.box/scripts/down.sh`
+1. `devbox doctor`
+2. `devbox up`
+3. `devbox health`
+4. `devbox test`
+5. `devbox down`
 ```
 
 ---
@@ -117,12 +117,12 @@ Typical flow:
 - State and logs MUST have stable locations for agents to discover signals.
 
 ### Optional (recommended)
-- Provide an MCP adapter contract at `.box/mcp/server.json`.
+- Provide an MCP adapter under `.box/mcp/`.
 - Expose only:
-  - `box.run`
-  - `box.health`
-  - `box.read_logs`
-  - `box.read_contract`
+  - `box-run`
+  - `box-health`
+  - `box-read-logs`
+  - `box-read-contract`
 
 ### Recommended README snippet
 

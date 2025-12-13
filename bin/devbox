@@ -1,0 +1,262 @@
+#!/usr/bin/env sh
+set -eu
+
+# devbox
+#
+# Lightweight command wrapper for DevBox template repo.
+# This is NOT a framework CLI — it simply dispatches to scripts.
+#
+# Usage (recommended: put this script in bin/ and add it to PATH):
+#   devbox init [TARGET_DIR] [options]
+#
+# Example:
+#   devbox init --minimal --gitignore
+#   devbox init ../my-repo --dry-run
+#
+# Common runtime commands (run inside a repo that already has .box/ installed):
+#   devbox doctor
+#   devbox up
+#   devbox health
+#   devbox down
+
+usage() {
+  cat <<'TXT'
+DevBox command wrapper
+
+Usage:
+  devbox init [TARGET_DIR] [options]
+  devbox <command> [args...]
+
+Commands:
+  init     Install DevBox into a repository
+  doctor   Validate environment + contract
+  up       Start local runtime
+  down     Stop local runtime
+  health   Health check (alias: smoke --health)
+  smoke    Run smoke checks
+  test     Run tests
+  logs     Inspect logs
+  reset    Clear ephemeral state
+  mcp      Manage editor wiring for the DevBox MCP server
+
+Notes:
+  - Non-init commands must be run from within a repo that already has .box/ installed.
+  - DevBox scripts load .box/env/.env.local automatically at runtime.
+
+Run `devbox init --help` for init options.
+Run `devbox mcp --help` for MCP options.
+TXT
+}
+
+mcp_usage() {
+  cat <<'TXT'
+DevBox MCP helper
+
+Usage:
+  devbox mcp enable     Create .vscode/mcp.json (symlink) pointing to DevBox MCP config
+  devbox mcp disable    Remove .vscode/mcp.json if it was created as a symlink
+  devbox mcp status     Show whether DevBox MCP wiring is enabled
+  devbox mcp start      Start the DevBox MCP server in the foreground (stdio)
+
+Notes:
+  - **Node.js and npm are required** to use MCP (used to install and build the server).
+  - `enable` installs dependencies and builds the MCP server automatically.
+  - It then wires VS Code to use the DevBox MCP configuration under .box/.
+  - `start` runs the bundled server directly in the foreground (useful for debugging or non-editor hosts).
+TXT
+}
+
+find_repo_root() {
+  dir="$PWD"
+  while [ "$dir" != "/" ]; do
+    if [ -d "$dir/.box" ]; then
+      printf "%s\n" "$dir"
+      return 0
+    fi
+    dir="$(dirname "$dir")"
+  done
+  return 1
+}
+
+require_repo_root() {
+  if ! REPO_ROOT="$(find_repo_root)"; then
+    echo "ERROR: No .box/ found in this directory or any parent." >&2
+    echo "Run this inside a DevBox-enabled repo, or run: devbox init ." >&2
+    exit 1
+  fi
+}
+
+if [ "${1:-}" = "" ]; then
+  usage
+  exit 1
+fi
+
+CMD="$1"
+shift
+
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+
+# Support running from either:
+#  - repo root (devbox next to install-devbox.sh)
+#  - bin/ (bin/devbox next to bin/install-devbox)
+INSTALL_SCRIPT="$SCRIPT_DIR/install-devbox.sh"
+if [ ! -f "$INSTALL_SCRIPT" ]; then
+  INSTALL_SCRIPT="$SCRIPT_DIR/../install-devbox.sh"
+fi
+
+if [ ! -f "$INSTALL_SCRIPT" ]; then
+  echo "ERROR: install-devbox.sh not found." >&2
+  echo "Looked in:" >&2
+  echo "  - $SCRIPT_DIR/install-devbox.sh" >&2
+  echo "  - $SCRIPT_DIR/../install-devbox.sh" >&2
+  exit 1
+fi
+
+case "$CMD" in
+  init)
+    exec "$INSTALL_SCRIPT" "$@"
+    ;;
+  doctor)
+    require_repo_root
+    cd "$REPO_ROOT"
+    exec ".box/scripts/doctor.sh" "$@"
+    ;;
+  up)
+    require_repo_root
+    cd "$REPO_ROOT"
+    exec ".box/scripts/up.sh" "$@"
+    ;;
+  down)
+    require_repo_root
+    cd "$REPO_ROOT"
+    exec ".box/scripts/down.sh" "$@"
+    ;;
+  health)
+    require_repo_root
+    cd "$REPO_ROOT"
+    exec ".box/scripts/smoke.sh" --health "$@"
+    ;;
+  smoke)
+    require_repo_root
+    cd "$REPO_ROOT"
+    exec ".box/scripts/smoke.sh" "$@"
+    ;;
+  test)
+    require_repo_root
+    cd "$REPO_ROOT"
+    exec ".box/scripts/test.sh" "$@"
+    ;;
+  logs)
+    require_repo_root
+    cd "$REPO_ROOT"
+    exec ".box/scripts/logs.sh" "$@"
+    ;;
+  reset)
+    require_repo_root
+    cd "$REPO_ROOT"
+    exec ".box/scripts/reset.sh" "$@"
+    ;;
+  mcp)
+    require_repo_root
+    cd "$REPO_ROOT"
+    sub="${1:-}"
+    shift || true
+
+    case "$sub" in
+      enable)
+        VSCODE_DIR=".vscode"
+        MCP_SRC=".box/mcp/config/mcp.json"
+        MCP_DST="$VSCODE_DIR/mcp.json"
+
+        if [ ! -f "$MCP_SRC" ]; then
+          echo "ERROR: $MCP_SRC not found (run devbox init first?)" >&2
+          exit 1
+        fi
+
+        command -v npm >/dev/null 2>&1 || {
+          echo "ERROR: npm is required for DevBox MCP" >&2
+          echo "Install Node.js from https://nodejs.org/" >&2
+          exit 1
+        }
+
+        MCP_SERVER_DIR=".box/mcp/server"
+        MCP_BIN="$MCP_SERVER_DIR/dist/devbox-mcp.mjs"
+
+        if [ ! -d "$MCP_SERVER_DIR" ]; then
+          echo "ERROR: MCP server directory not found at $MCP_SERVER_DIR" >&2
+          exit 1
+        fi
+
+        echo "Installing MCP server dependencies..."
+        (cd "$MCP_SERVER_DIR" && npm install)
+
+        echo "Building MCP server..."
+        (cd "$MCP_SERVER_DIR" && npm run build)
+
+        if [ ! -f "$MCP_BIN" ]; then
+          echo "ERROR: MCP server bundle not found after build at $MCP_BIN" >&2
+          echo "Check build output / package.json scripts in $MCP_SERVER_DIR" >&2
+          exit 1
+        fi
+
+        mkdir -p "$VSCODE_DIR"
+
+        if [ -e "$MCP_DST" ]; then
+          echo "MCP already configured at $MCP_DST"
+          exit 0
+        fi
+
+        ln -s "../$MCP_SRC" "$MCP_DST"
+        echo "DevBox MCP enabled: $MCP_DST -> ../$MCP_SRC"
+        ;;
+      start)
+        MCP_BIN=".box/mcp/server/dist/devbox-mcp.mjs"
+        if [ ! -f "$MCP_BIN" ]; then
+          echo "ERROR: MCP server bundle not found at $MCP_BIN" >&2
+          echo "Build it first (from the DevBox repo):" >&2
+          echo "  cd .box/mcp/server && npm install && npm run build" >&2
+          exit 1
+        fi
+        exec node "$MCP_BIN"
+        ;;
+      disable)
+        MCP_DST=".vscode/mcp.json"
+        if [ -L "$MCP_DST" ]; then
+          rm "$MCP_DST"
+          echo "DevBox MCP disabled (removed $MCP_DST)"
+        elif [ -e "$MCP_DST" ]; then
+          echo "Refusing to remove $MCP_DST (not a symlink)" >&2
+          exit 1
+        else
+          echo "DevBox MCP is not enabled"
+        fi
+        ;;
+      status)
+        MCP_DST=".vscode/mcp.json"
+        if [ -L "$MCP_DST" ]; then
+          echo "enabled: $MCP_DST -> $(readlink "$MCP_DST")"
+        elif [ -e "$MCP_DST" ]; then
+          echo "present (not symlink): $MCP_DST"
+        else
+          echo "disabled"
+        fi
+        ;;
+      --help|-h|help|"")
+        mcp_usage
+        ;;
+      *)
+        echo "Unknown subcommand: $sub" >&2
+        mcp_usage
+        exit 1
+        ;;
+    esac
+    ;;
+  --help|-h|help)
+    usage
+    ;;
+  *)
+    echo "Unknown command: $CMD" >&2
+    usage
+    exit 1
+    ;;
+esac

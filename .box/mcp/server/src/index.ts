@@ -32,7 +32,8 @@ function readYaml<T>(p: string): T {
 
 function safeResolve(rel: string): string {
   const abs = path.resolve(REPO_ROOT, rel);
-  if (!abs.startsWith(REPO_ROOT)) {
+  // Prevent prefix-trick paths (e.g. /repo vs /repo-evil)
+  if (!(abs === REPO_ROOT || abs.startsWith(REPO_ROOT + path.sep))) {
     throw new Error(`Path escapes repo root: ${rel}`);
   }
   return abs;
@@ -52,7 +53,8 @@ function allowlistedCommand(cmd: string, policies: PoliciesYaml): boolean {
 }
 
 function withinReadPaths(filePath: string, policies: PoliciesYaml): boolean {
-  const allow = policies.allow?.read_paths ?? ["."];
+  // Default-deny if policies are missing/malformed
+  const allow = policies.allow?.read_paths ?? [];
   const rel = path.relative(REPO_ROOT, filePath).replaceAll("\\", "/");
   return allow.some((p) => {
     const norm = p.replaceAll("\\", "/").replace(/\/+$/, "");
@@ -139,7 +141,7 @@ async function main() {
     const maxBytes = policies.limits?.max_log_bytes_to_read ?? 2_000_000;
     const timeoutMs = (policies.limits?.max_runtime_seconds ?? 900) * 1000;
 
-    if (tool === "box.run") {
+    if (tool === "box-run") {
       const cmdName = String(input.command ?? "");
       if (!cmdName) throw new Error("Missing command");
 
@@ -162,7 +164,10 @@ async function main() {
       };
     }
 
-    if (tool === "box.health") {
+    if (tool === "box-health") {
+      if (!allowlistedCommand("health", policies)) {
+        throw new Error(`Command not allowlisted by .box/policies.yaml: health`);
+      }
       // implement via the box "health" command so it stays consistent with your scripts
       const cmd = box.commands?.["health"]?.run;
       if (!cmd) throw new Error(`Missing commands.health in .box/box.yaml`);
@@ -174,7 +179,7 @@ async function main() {
       };
     }
 
-    if (tool === "box.read_logs") {
+    if (tool === "box-read-logs") {
       const glob = String(input.glob ?? "");
       const tailLines = Math.max(1, Math.min(2000, Number(input.tailLines ?? 200)));
       const contains = input.contains ? String(input.contains) : null;
@@ -197,12 +202,16 @@ async function main() {
       return { content: [{ type: "text", text: chunks.join("\n\n") || "(no matching logs)" }] };
     }
 
-    if (tool === "box.read_contract") {
+    if (tool === "box-read-contract") {
       const rel = String(input.path ?? "");
       if (!rel) throw new Error("Missing path");
 
       const abs = safeResolve(rel);
       if (!withinReadPaths(abs, policies)) throw new Error("Path not allowed by policies");
+      const st = fs.statSync(abs);
+      if (st.size > maxBytes) {
+        throw new Error(`File too large to read (${st.size} bytes > ${maxBytes} bytes)`);
+      }
       const text = fs.readFileSync(abs, "utf8");
       return { content: [{ type: "text", text }] };
     }
