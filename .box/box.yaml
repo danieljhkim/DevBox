@@ -1,7 +1,7 @@
 version: 1
 name: "devbox"
 type: "service"  # service | cli | library | distributed | mono
-spec_version: "0.1"
+spec_version: "0.1.0"
 
 commands:
   bootstrap:
@@ -15,7 +15,7 @@ commands:
     description: "Stop local runtime."
   reset:
     run: ".box/scripts/reset.sh"
-    description: "Clean ephemeral state/logs/reports; return to fresh state."
+    description: "Clean ephemeral state and reports; preserve logs."
   test:
     run: ".box/scripts/test.sh"
     description: "Run the full test suite (unit + integration if available)."

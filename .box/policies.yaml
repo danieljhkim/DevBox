@@ -1,35 +1,26 @@
 # If you don’t understand this file, do not loosen it.
 
 version: 1
-mode: "readonly"  # readonly | safe-write | admin
+mode: "safe-write"  # readonly | safe-write | admin
 
 allow:
   commands:
-    - bootstrap
     - up
     - down
     - doctor
     - test
     - smoke
-    - lint
-    - fmt
-    - bench
     - logs
-    - report
     - reset
 
   read_paths:
     - ".box/"
-    - "src/"
     - "logs/"
     - "reports/"
-    - "contracts/"
     - ".box/contracts/"
-    - "."
 
   write_paths:
     - "reports/"
-    - "logs/"
     - ".box/state/"
 
 deny:
@@ -39,6 +30,11 @@ deny:
     - release
     - prod
     - delete_data
+    - rm
+    - mv
+    - cp
+    - chmod
+    - chown
 
 limits:
   max_runtime_seconds: 900

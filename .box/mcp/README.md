@@ -1,8 +1,3 @@
-# MCP
-
-This folder defines a minimal, language-agnostic tool surface in `server.json`.
-Implementation of an actual MCP server is intentionally separate; this file is the contract.
-
 # DevBox MCP (MVP)
 
 This directory defines the **Model Context Protocol (MCP) contract** for DevBox.
@@ -16,8 +11,8 @@ The goal of the MVP is to make a DevBox-enabled repository **operable by AI agen
 ## What This Is
 
 - A **tool contract** (`server.json`) that describes what agents are allowed to do
-- A **stable interface** between DevBox and any MCP-compatible host (e.g., Cursor)
-- A **policy-respecting control plane** over the DevBox commands
+- A **stable interface** between DevBox and any MCP-compatible host (e.g. Cursor)
+- A **policy-respecting control plane** over DevBox commands
 
 This folder defines **what is exposed**, not **how it is implemented**.
 
@@ -36,7 +31,7 @@ This is an **adapter contract**, nothing more.
 
 ## MVP Tool Surface
 
-The MVP exposes a small, deliberate set of tools:
+The MVP exposes a small, deliberate set of tools.
 
 ### `box.run`
 Run a named, allowlisted DevBox command.
@@ -88,7 +83,7 @@ If a capability is not explicitly defined here, it is not supported.
 
 ## Relationship to DevBox
 
-```
+```text
 DevBox (spec + scripts)
         ↓
    MCP contract
