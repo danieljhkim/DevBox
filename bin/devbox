@@ -37,12 +37,13 @@ Commands:
   test     Run tests
   logs     Inspect logs
   reset    Clear ephemeral state
+  policy   Switch DevBox policy profile (readonly|safe-write|admin)
   mcp      Manage editor wiring for the DevBox MCP server
 
 Notes:
   - Non-init commands must be run from within a repo that already has .box/ installed.
   - DevBox scripts load .box/env/.env.local automatically at runtime.
-
+  - Policy profiles live under .box/policies/ and are activated by writing .box/policies.yaml.
 Run `devbox init --help` for init options.
 Run `devbox mcp --help` for MCP options.
 TXT
@@ -63,6 +64,25 @@ Notes:
   - `enable` installs dependencies and builds the MCP server automatically.
   - It then wires VS Code to use the DevBox MCP configuration under .box/.
   - `start` runs the bundled server directly in the foreground (useful for debugging or non-editor hosts).
+TXT
+}
+
+policy_usage() {
+  cat <<'TXT'
+DevBox policy helper
+
+Usage:
+  devbox policy show
+  devbox policy list
+  devbox policy set <readonly|safe-write|admin>
+
+Behavior:
+  - Reads policy profiles from: .box/policies/<mode>.yaml
+  - Activates a profile by writing: .box/policies.yaml
+
+Notes:
+  - This only changes the active policy file in the repo you run it from.
+  - If .box/policies/ is missing, (re)install DevBox or add the profiles.
 TXT
 }
 
@@ -155,6 +175,77 @@ case "$CMD" in
     require_repo_root
     cd "$REPO_ROOT"
     exec ".box/scripts/reset.sh" "$@"
+    ;;
+  policy)
+    require_repo_root
+    cd "$REPO_ROOT"
+
+    sub="${1:-}"
+    shift || true
+
+    POLICY_DIR=".box/policies"
+    ACTIVE_POLICY=".box/policies.yaml"
+
+    case "$sub" in
+      show)
+        if [ -f "$ACTIVE_POLICY" ]; then
+          echo "active: $ACTIVE_POLICY"
+          # print mode if present (best-effort)
+          awk '/^[[:space:]]*mode:/{print "mode:", $2}' "$ACTIVE_POLICY" | tr -d '"' || true
+        else
+          echo "no active policy (missing $ACTIVE_POLICY)" >&2
+          exit 1
+        fi
+        ;;
+      list)
+        if [ -d "$POLICY_DIR" ]; then
+          echo "profiles:"
+          # List *.yaml basenames without extension, sorted
+          find "$POLICY_DIR" -maxdepth 1 -type f -name "*.yaml" -print \
+            | sed "s#^$POLICY_DIR/##" \
+            | sed 's/\.yaml$//' \
+            | sort
+        else
+          echo "no profiles directory (missing $POLICY_DIR)" >&2
+          exit 1
+        fi
+        ;;
+      set)
+        mode="${1:-}"
+        if [ "$mode" = "" ]; then
+          echo "ERROR: missing mode" >&2
+          policy_usage
+          exit 1
+        fi
+
+        case "$mode" in
+          readonly|safe-write|admin) ;;
+          *)
+            echo "ERROR: invalid mode: $mode" >&2
+            policy_usage
+            exit 1
+            ;;
+        esac
+
+        src="$POLICY_DIR/$mode.yaml"
+        if [ ! -f "$src" ]; then
+          echo "ERROR: policy profile not found: $src" >&2
+          echo "Expected profiles under: $POLICY_DIR" >&2
+          exit 1
+        fi
+
+        cp "$src" "$ACTIVE_POLICY"
+        echo "Switched policy -> $mode"
+        ;;
+      --help|-h|help|"")
+        policy_usage
+        ;;
+      *)
+        echo "Unknown subcommand: $sub" >&2
+        policy_usage
+        exit 1
+        ;;
+    esac
     ;;
   mcp)
     require_repo_root

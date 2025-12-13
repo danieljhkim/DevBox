@@ -1,4 +1,3 @@
-
 # DevBox
 
 While working as a data engineer, I repeatedly ran into the same bottleneck: the gap between local development and validation.
@@ -41,8 +40,8 @@ It is a **thin control layer** around your existing project.
 git clone https://github.com/danieljhkim/DevBox.git
 cd DevBox
 
-# 1) Ensure the devbox script is executable
-chmod +x /bin/*
+# 1) Ensure the devbox scripts are executable
+chmod +x bin/*
 
 # 2) Add DevBox to your PATH (adjust this to where you cloned the DevBox repo)
 echo 'export PATH="$HOME/path/to/devbox/bin:$PATH"' >> ~/.zprofile
@@ -59,6 +58,10 @@ cp .box/env/.env.local.example .box/env/.env.local
 devbox doctor
 devbox up
 
+# 6) (Optional) Inspect or switch agent execution policy
+devbox policy show
+devbox policy list
+devbox policy set safe-write
 ```
 
 See `QUICK_START.md` for the full workflow.
@@ -132,6 +135,17 @@ They specify:
 - execution limits
 
 This prevents accidental or malicious actions while enabling autonomy.
+
+Policies are managed via named profiles (for example: `readonly`, `safe-write`, `admin`)
+stored under `.box/policies/`. One profile is active at a time.
+
+You can inspect or switch the active policy using:
+
+```bash
+devbox policy show
+devbox policy list
+devbox policy set readonly|safe-write|admin
+```
 
 ---
 
@@ -230,6 +244,8 @@ devbox health
 devbox test
 devbox logs
 devbox down
+devbox policy show
+devbox policy set safe-write
 ```
 
 The CLI discovers the repo root automatically by locating `.box/`.
