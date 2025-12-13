@@ -1,0 +1,177 @@
+#!/usr/bin/env sh
+set -eu
+
+# install-devbox.sh
+#
+# Copy the DevBox contract (.box/) from this template repo into a target repo.
+#
+# Usage:
+#   ./install-devbox.sh                 # install into current directory
+#   ./install-devbox.sh /path/to/repo   # install into target repo
+#
+# Options:
+#   --minimal     Install only the core DevBox contract (skips .box/mcp/)
+#   --force       Overwrite existing .box/ in target
+#   --gitignore   Append recommended ignores to target .gitignore (best-effort)
+#   --dry-run     Print what would be done without making changes
+#   --help        Show help
+
+usage() {
+  cat <<'TXT'
+DevBox installer
+
+Usage:
+  ./install-devbox.sh [TARGET_DIR] [--minimal] [--force] [--gitignore] [--dry-run]
+  ./install-devbox.sh --help
+
+Options:
+  --minimal     Install only the core DevBox contract (skips .box/mcp/)
+  --force       Overwrite existing .box/ in target
+  --gitignore   Append recommended ignores to target .gitignore (best-effort)
+  --dry-run     Print actions without modifying the filesystem
+TXT
+}
+
+log() { printf "%s\n" "$*"; }
+err() { printf "ERROR: %s\n" "$*" >&2; }
+
+FORCE=0
+DO_GITIGNORE=0
+MINIMAL=0
+DRY_RUN=0
+TARGET_DIR=""
+
+# Parse args
+while [ "${1:-}" != "" ]; do
+  case "$1" in
+    --minimal) MINIMAL=1; shift ;;
+    --force) FORCE=1; shift ;;
+    --gitignore) DO_GITIGNORE=1; shift ;;
+    --dry-run) DRY_RUN=1; shift ;;
+    --help|-h) usage; exit 0 ;;
+    *)
+      if [ "$TARGET_DIR" = "" ]; then
+        TARGET_DIR="$1"
+        shift
+      else
+        err "Unknown argument: $1"
+        usage
+        exit 1
+      fi
+      ;;
+  esac
+done
+
+if [ "$TARGET_DIR" = "" ]; then
+  TARGET_DIR="."
+fi
+
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+SRC_BOX_DIR="$SCRIPT_DIR/.box"
+
+if [ ! -d "$SRC_BOX_DIR" ]; then
+  err "Template .box/ not found at: $SRC_BOX_DIR"
+  err "Run this script from the DevBox template repo root."
+  exit 1
+fi
+
+TARGET_DIR="$(CDPATH= cd -- "$TARGET_DIR" && pwd)"
+DST_BOX_DIR="$TARGET_DIR/.box"
+
+MODE="$( [ "$MINIMAL" -eq 1 ] && echo minimal || echo full )"
+
+log "DevBox install"
+log "  Source : $SRC_BOX_DIR"
+log "  Target : $TARGET_DIR"
+log "  Mode   : $MODE"
+log "  DryRun : $( [ "$DRY_RUN" -eq 1 ] && echo yes || echo no )"
+
+doit() {
+  if [ "$DRY_RUN" -eq 1 ]; then
+    log "DRY-RUN: $*"
+  else
+    "$@"
+  fi
+}
+
+if [ -d "$DST_BOX_DIR" ] && [ "$FORCE" -ne 1 ]; then
+  err "Target already has .box/: $DST_BOX_DIR"
+  err "Re-run with --force to overwrite."
+  exit 1
+fi
+
+if [ -d "$DST_BOX_DIR" ] && [ "$FORCE" -eq 1 ]; then
+  log "Overwriting existing .box/ (force)"
+  doit rm -rf "$DST_BOX_DIR"
+fi
+
+doit mkdir -p "$DST_BOX_DIR"
+
+copy_dir() {
+  src="$1"
+  dst="$2"
+  [ -d "$src" ] || return 0
+
+  if command -v rsync >/dev/null 2>&1; then
+    doit rsync -a "$src/" "$dst/"
+  else
+    doit mkdir -p "$dst"
+    doit cp -R "$src/"* "$dst/" 2>/dev/null || true
+  fi
+}
+
+copy_file_if_exists() {
+  src="$1"
+  dst="$2"
+  [ -f "$src" ] || return 0
+  doit mkdir -p "$(dirname -- "$dst")"
+  doit cp "$src" "$dst"
+}
+
+if [ "$MINIMAL" -eq 1 ]; then
+  log "Installing core DevBox contract only"
+  copy_file_if_exists "$SRC_BOX_DIR/box.yaml" "$DST_BOX_DIR/box.yaml"
+  copy_file_if_exists "$SRC_BOX_DIR/policies.yaml" "$DST_BOX_DIR/policies.yaml"
+  copy_dir "$SRC_BOX_DIR/scripts" "$DST_BOX_DIR/scripts"
+  copy_dir "$SRC_BOX_DIR/env" "$DST_BOX_DIR/env"
+  doit mkdir -p "$DST_BOX_DIR/state" "$DST_BOX_DIR/contracts"
+else
+  log "Installing full DevBox template"
+  if command -v rsync >/dev/null 2>&1; then
+    doit rsync -a --delete "$SRC_BOX_DIR/" "$DST_BOX_DIR/"
+  else
+    copy_dir "$SRC_BOX_DIR" "$DST_BOX_DIR"
+  fi
+fi
+
+doit mkdir -p "$TARGET_DIR/logs" "$TARGET_DIR/reports"
+
+if [ "$DO_GITIGNORE" -eq 1 ]; then
+  log "Updating .gitignore (best-effort)"
+  GITIGNORE="$TARGET_DIR/.gitignore"
+  doit touch "$GITIGNORE"
+
+  if ! grep -q "### DevBox ###" "$GITIGNORE" 2>/dev/null; then
+    doit sh -c "cat >> '$GITIGNORE' <<'GIT'
+
+### DevBox ###
+/logs/*.log
+/reports/
+/.box/state/
+/.box/state/**
+/.box/env/.env.local
+GIT"
+  fi
+fi
+
+log ""
+log "✅ DevBox install complete"
+log ""
+log "Next steps:"
+log "  1) cp .box/env/.env.local.example .box/env/.env.local"
+log "  2) edit .box/env/.env.local and set BOX_UP_CMD / BOX_DOWN_CMD / BOX_HEALTH_URL"
+log "  3) run:"
+log "       .box/scripts/doctor.sh"
+log "       .box/scripts/up.sh"
+log "       .box/scripts/smoke.sh --health"
+log "       .box/scripts/down.sh"
