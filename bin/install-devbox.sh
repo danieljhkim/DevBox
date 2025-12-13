@@ -154,7 +154,7 @@ else
   fi
 fi
 
-doit mkdir -p "$TARGET_DIR/logs" "$TARGET_DIR/reports"
+doit mkdir -p "$TARGET_DIR/logs" "$TARGET_DIR/.box/reports"
 
 if [ "$DO_GITIGNORE" -eq 1 ]; then
   log "Updating .gitignore (best-effort)"
@@ -166,7 +166,7 @@ if [ "$DO_GITIGNORE" -eq 1 ]; then
 
 ### DevBox ###
 /logs/*.log
-/reports/
+/.box/reports/
 /.box/state/
 /.box/state/**
 /.box/env/.env.local

@@ -9,5 +9,5 @@
 
 ## Where to look
 - Logs: logs/
-- Reports: reports/
+- Reports: .box/reports/
 - Box config: .box/box.yaml

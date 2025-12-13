@@ -15,7 +15,7 @@ BOX_DIR="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)"
 
 LOG_DIR="$ROOT_DIR/logs"
-REPORT_DIR="$ROOT_DIR/reports"
+REPORT_DIR="$BOX_DIR/reports"
 STATE_DIR="$BOX_DIR/state"
 
 timestamp() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }

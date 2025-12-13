@@ -62,7 +62,7 @@ This creates:
 ```text
 .box/
 logs/
-reports/
+.box/reports/
 ```
 
 ---
@@ -150,7 +150,7 @@ devbox test
 
 This script should:
 - run fast, deterministic validation
-- write artifacts to `reports/`
+- write artifacts to `.box/reports/`
 - exit non-zero on failure
 
 DevBox does not enforce *how* tests run — only *where outputs go*.

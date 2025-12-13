@@ -7,9 +7,9 @@ allow:
     - ".box/"
     - ".box/contracts/"
     - "logs/"
-    - "reports/"
+    - ".box/reports/"
   write_paths:
-    - "reports/"
+    - ".box/reports/"
     - ".box/state/"
 
 deny:

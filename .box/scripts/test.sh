@@ -5,5 +5,5 @@ set -eu
 
 ensure_dirs
 log "Test: (project-specific) run unit/integration tests."
-log "TODO: implement test command(s) for this repo. Write artifacts to reports/ if available."
+log "TODO: implement test command(s) for this repo. Write artifacts to .box/reports/ if available."
 exit 0

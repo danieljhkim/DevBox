@@ -68,8 +68,8 @@ Policies:
 - deny access outside the allowlist
 
 Recommended defaults:
-- read: `.box/`, `logs/`, `reports/`, `.box/contracts/`
-- write: `.box/state/`, `reports/`
+- read: `.box/`, `logs/`, `.box/reports/`, `.box/contracts/`
+- write: `.box/state/`, `.box/reports/`
 
 This prevents agents from:
 - modifying source code

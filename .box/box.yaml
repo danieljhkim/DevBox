@@ -42,11 +42,11 @@ commands:
     description: "Tail/filter logs in logs/."
   report:
     run: ".box/scripts/report.sh"
-    description: "Summarize latest test artifacts in reports/."
+    description: "Summarize latest test artifacts in .box/reports/."
 
 artifacts:
   logs_dir: "logs/"
-  reports_dir: "reports/"
+  reports_dir: ".box/reports/"
   state_dir: ".box/state/"
 
 runtime:
@@ -79,10 +79,10 @@ signals:
 
   reports:
     junit:
-      - "reports/junit.xml"
-      - "reports/junit/*.xml"
+      - ".box/reports/junit.xml"
+      - ".box/reports/junit/*.xml"
     coverage:
-      - "reports/coverage/*"
+      - ".box/reports/coverage/*"
 
 contracts:
   locations:

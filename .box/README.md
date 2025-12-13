@@ -53,7 +53,7 @@ Rules:
 Scripts MUST:
 - write logs to `logs/`
 - write state to `.box/state/`
-- write artifacts to `reports/` (if applicable)
+- write artifacts to `.box/reports/` (if applicable)
 
 ---
 

@@ -17,11 +17,11 @@ allow:
   read_paths:
     - ".box/"
     - "logs/"
-    - "reports/"
+    - ".box/reports/"
     - ".box/contracts/"
 
   write_paths:
-    - "reports/"
+    - ".box/reports/"
     - ".box/state/"
 
 deny:

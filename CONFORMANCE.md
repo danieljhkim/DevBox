@@ -39,7 +39,7 @@ A Core repo MUST include:
 At runtime, these MUST exist:
 
 - `logs/`
-- `reports/`
+- `.box/reports/`
 - `.box/state/`
 
 ### Required commands
@@ -86,8 +86,8 @@ Extended requires all Core commands plus these to be implemented:
 - `reset` — clear DevBox state (non-destructive)
 
 ### Additional behavioral requirements
-- `test` SHOULD write artifacts (reports, summaries) to `reports/`.
-- `reset` SHOULD preserve `logs/` (delete only `.box/state/` and `reports/`).
+- `test` SHOULD write artifacts (reports, summaries) to `.box/reports/`.
+- `reset` SHOULD preserve `logs/` (delete only `.box/state/` and `.box/reports/`).
 
 ### Recommended README snippet
 
@@ -112,8 +112,8 @@ Typical flow:
 - Must meet **Extended** conformance.
 - `.box/policies.yaml` MUST be **deny-by-default** and allowlist only DevBox commands.
 - Policies MUST restrict:
-  - readable paths (e.g. `.box/`, `logs/`, `reports/`)
-  - writable paths (e.g. `.box/state/`, `reports/`)
+  - readable paths (e.g. `.box/`, `logs/`, `.box/reports/`)
+  - writable paths (e.g. `.box/state/`, `.box/reports/`)
 - State and logs MUST have stable locations for agents to discover signals.
 
 ### Optional (recommended)
@@ -144,11 +144,11 @@ Use this checklist in PRs when someone claims DevBox conformance.
 - [ ] `.box/box.yaml` exists and lists `up/down/health/doctor`
 - [ ] `.box/scripts/` contains corresponding scripts
 - [ ] Commands fail fast and return non-zero on errors
-- [ ] `logs/`, `reports/`, `.box/state/` are produced at runtime
+- [ ] `logs/`, `.box/reports/`, `.box/state/` are produced at runtime
 
 ### Extended
 - [ ] Implements `test/smoke/logs/reset`
-- [ ] `test` writes outputs to `reports/` (even a simple summary is OK)
+- [ ] `test` writes outputs to `.box/reports/` (even a simple summary is OK)
 - [ ] `reset` clears state/reports without deleting logs
 
 ### Agent-Ready
