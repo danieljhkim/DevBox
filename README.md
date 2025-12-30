@@ -48,7 +48,7 @@ echo 'export PATH="$HOME/path/to/devbox/bin:$PATH"' >> ~/.zprofile
 
 # 3) Install DevBox into the target repo
 cd /path/to/your-repo
-devbox init . --minimal --gitignore
+devbox init .
 
 # 4) Configure local runtime commands
 cp .box/env/.env.local.example .box/env/.env.local
@@ -84,7 +84,11 @@ But most repositories expose **implicit**, undocumented, and unsafe execution su
 - fragile local instructions
 - unrestricted command execution
 
-DevBox makes the execution surface **explicit, deterministic, and safe**.
+To enforce tighter rules, we are forced to maintain fragmented, tool-specific rules (.cursorrules, .claudecode, etc.) for every new agentic workflow. And with every new agentic IDE or CLI tools we adopt, more of these fragmented instructions clutter our codebase and our mind. 
+
+DevBox aims to solve this by providing a universal source of truth for all agentic workflows.
+
+At the least, I hope it can provide some inspirations.
 
 ---
 
