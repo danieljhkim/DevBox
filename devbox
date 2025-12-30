@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Allow an override (Homebrew wrapper can set this)
+DEVBOX_HOME="${DEVBOX_HOME:-}"
+
+if [[ -z "$DEVBOX_HOME" ]]; then
+  DEVBOX_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+fi
+
+# Verify the actual executable exists
+if [[ ! -f "$DEVBOX_HOME/bin/devbox" ]]; then
+  echo "Error: $DEVBOX_HOME/bin/devbox not found" >&2
+  exit 1
+fi
+
+# Now you can reliably refer to:
+#   "$DEVBOX_HOME/.box"
+#   "$DEVBOX_HOME/bin/..."
+# etc.
+exec "$DEVBOX_HOME/bin/devbox" "$@"

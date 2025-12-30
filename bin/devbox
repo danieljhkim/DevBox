@@ -117,18 +117,18 @@ shift
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 
 # Support running from either:
-#  - repo root (devbox next to install-devbox.sh)
+#  - repo root (devbox next to install-devbox)
 #  - bin/ (bin/devbox next to bin/install-devbox)
-INSTALL_SCRIPT="$SCRIPT_DIR/install-devbox.sh"
+INSTALL_SCRIPT="$SCRIPT_DIR/install-devbox"
 if [ ! -f "$INSTALL_SCRIPT" ]; then
-  INSTALL_SCRIPT="$SCRIPT_DIR/../install-devbox.sh"
+  INSTALL_SCRIPT="$SCRIPT_DIR/../install-devbox"
 fi
 
 if [ ! -f "$INSTALL_SCRIPT" ]; then
-  echo "ERROR: install-devbox.sh not found." >&2
+  echo "ERROR: install-devbox not found." >&2
   echo "Looked in:" >&2
-  echo "  - $SCRIPT_DIR/install-devbox.sh" >&2
-  echo "  - $SCRIPT_DIR/../install-devbox.sh" >&2
+  echo "  - $SCRIPT_DIR/install-devbox" >&2
+  echo "  - $SCRIPT_DIR/../install-devbox" >&2
   exit 1
 fi
 
