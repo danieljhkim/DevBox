@@ -3,7 +3,7 @@ set -eu
 
 # install-devbox
 #
-# Copy the DevBox contract (.box/) from this template repo into a target repo.
+# Copy the DevBox contract (.box/) from this template repo + packaged install into a target repo.
 #
 # Usage (recommended: put this script in bin/ and add it to PATH):
 #   install-devbox                 # install into current directory
@@ -69,7 +69,7 @@ fi
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 
 # Support running from either:
-#  - repo root (install-devbox.sh next to .box/)
+#  - repo root (install-devbox next to .box/)
 #  - bin/ (bin/install-devbox next to ../.box/)
 SRC_BOX_DIR="$SCRIPT_DIR/.box"
 if [ ! -d "$SRC_BOX_DIR" ]; then

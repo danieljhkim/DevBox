@@ -3,7 +3,7 @@ set -eu
 
 # devbox
 #
-# Lightweight command wrapper for DevBox template repo.
+# Lightweight command wrapper for DevBox template repo + packaged install.
 # This is NOT a framework CLI — it simply dispatches to scripts.
 #
 # Usage (recommended: put this script in bin/ and add it to PATH):

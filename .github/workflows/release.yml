@@ -1,0 +1,46 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build release artifacts
+        run: |
+          chmod +x scripts/pack.sh
+          ./scripts/pack.sh "${GITHUB_REF_NAME}"
+
+      - name: Create (or update) GitHub Release and upload assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Ensure GitHub CLI is available (ubuntu-latest usually includes it, but keep this defensive).
+          if ! command -v gh >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y gh
+          fi
+
+          TAG="${GITHUB_REF_NAME}"
+
+          # If the release already exists (e.g., rerun), upload/replace assets. Otherwise, create it.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber
+          else
+            gh release create "$TAG" \
+              --title "$TAG" \
+              --generate-notes \
+              dist/*
+          fi
