@@ -13,45 +13,42 @@ It wraps what you already have and makes it **explicit, deterministic, and opera
   - start the system locally
   - stop it
   - validate changes (tests, checks, etc.)
-- POSIX shell (`sh`)
+- POSIX shell (sh) + common CLI tools (tar, sha256sum/shasum)
 - No Docker, CI, or framework assumptions required
 
 ---
 
 ## 1. Install DevBox
 
+### Homebrew (Recommended)
+
 ```bash
-# 0) Clone the DevBox template repo and cd into it
-git clone https://github.com/danieljhkim/DevBox.git
-cd DevBox
+# 0) Install DevBox
+brew tap danieljhkim/tap
+brew install danieljhkim/tap/devbox
+
+# (optional) upgrade later
+brew upgrade danieljhkim/tap/devbox
 ```
 
-First, make sure the DevBox `bin/` directory is on your `PATH`:
+Then, adopt DevBox in a target repo.
+
+From anywhere:
 
 ```bash
-# Ensure the devbox script is executable
-chmod +x /bin/*
-
-# Add DevBox to your PATH (adjust this to where you cloned the DevBox repo)
-echo 'export PATH="$HOME/path/to/devbox/bin:$PATH"' >> ~/.zprofile
-```
-
-Then, from anywhere:
-
-```bash
-devbox init /path/to/your-repo --minimal --gitignore
+devbox init /path/to/your-repo --gitignore
 ```
 
 Or from inside the target repo:
 
 ```bash
-devbox init . --minimal --gitignore
+devbox init . --gitignore
 ```
 
 To preview changes without modifying anything:
 
 ```bash
-devbox init . --minimal --gitignore --dry-run
+devbox init . --gitignore --dry-run
 ```
 
 ![devbox init](docs/images/devbox_cmd.png)
@@ -60,14 +57,13 @@ devbox init . --minimal --gitignore --dry-run
 This creates:
 
 ```text
-.box/
 logs/
-.box/reports/
+.box/
 ```
 
 ---
 
-## 2. Configure Runtime Commands (Option B)
+## 2. Configure Runtime Commands
 
 DevBox is **language-agnostic**.  
 You tell it how to run your system.

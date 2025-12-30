@@ -1,25 +1,24 @@
 # DevBox
 
-While working as a data engineer, I repeatedly ran into the same bottleneck: the gap between local development and validation.
+Modern repos are increasingly operated by AI agents.
 
-A small code change often meant spinning up a cloud cluster just to test a single component. This slowed iteration, introduced unnecessary friction, and—most importantly—created a hard disconnect between my local environment and the system actually running the code.
+In practice, that has created a new kind of operational debt: **instruction fatigue**.
 
-That disconnect became even more apparent when working with AI tools. Agents couldn’t:
-- access logs directly
-- observe failures as they happened
-- iterate autonomously on fixes
+Every new agent workflow (Cursor, Claude Code, Copilot, custom CLIs, MCP tools, etc.) tends to introduce its own rule files and conventions—`.cursorrules`, `.claudecode`, prompt snippets, allowlists, scripts, and one-off docs. Over time these accumulate, drift out of date, and clutter the repo with fragmented “sources of truth.”
 
-Validation lived “somewhere else,” and progress suffered because of it.
+The result is predictable:
+- onboarding is slower
+- local workflows are inconsistent
+- agents are powerful but unsafe (or safe but ineffective)
+- execution knowledge lives in too many places
 
-So I moved the cluster onto my local machine. Once everything ran locally, something clicked.
+**DevBox** is a lightweight, language‑agnostic **execution contract** that makes your repo’s development interface explicit, deterministic, and policy‑gated for both humans and AI agents.
 
-AI agents could execute commands, read logs, detect failures, and retry—without human glue code in between. Development stopped being a linear, line-by-line activity and became something else entirely.
-
-**We weren’t just coding anymore. We were orchestrating.**
-
-To make that orchestration explicit and safe, ChatGPT and I designed **DevBox**: a development box for your agent and your codebase.
-
-**DevBox** is a lightweight, language‑agnostic **development execution contract** for humans *and* AI agents.
+DevBox lives in `.box/` and centralizes:
+- how to start/stop the system locally
+- how to validate changes
+- where logs and artifacts live
+- what actions are allowed under each policy
 
 It defines:
 - how a project is started
@@ -33,32 +32,29 @@ It is a **thin control layer** around your existing project.
 
 ---
 
-## Quick Start (Template)
+## Installation
+
+### Homebrew (Recommended)
 
 ```bash
-# 0) Clone the DevBox template repo and cd into it
-git clone https://github.com/danieljhkim/DevBox.git
-cd DevBox
+# 0) Install DevBox
+brew tap danieljhkim/tap
+brew install danieljhkim/tap/devbox
 
-# 1) Ensure the devbox scripts are executable
-chmod +x bin/*
 
-# 2) Add DevBox to your PATH (adjust this to where you cloned the DevBox repo)
-echo 'export PATH="$HOME/path/to/devbox/bin:$PATH"' >> ~/.zprofile
-
-# 3) Install DevBox into the target repo
+# 1) Install DevBox into the target repo
 cd /path/to/your-repo
 devbox init .
 
-# 4) Configure local runtime commands
+# 2) Configure local runtime commands
 cp .box/env/.env.local.example .box/env/.env.local
 # edit .box/env/.env.local and set BOX_UP_CMD / BOX_DOWN_CMD / BOX_HEALTH_URL
 
-# 5) Verify and start (can be run from anywhere inside the repo)
+# 3) Verify and start (can be run from anywhere inside the repo)
 devbox doctor
 devbox up
 
-# 6) (Optional) Inspect or switch agent execution policy
+# 4) (Optional) Inspect or switch agent execution policy
 devbox policy show
 devbox policy list
 devbox policy set safe-write
